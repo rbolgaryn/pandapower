@@ -282,6 +282,7 @@ def newtonpf(Ybus, Sbus, V0, ref, pv, pq, ppci, options, makeYbus=None):
             x_control_svc[svc_controllable] += dx[j6:j6a]
         if num_tcsc_controllable > 0:
             x_control_tcsc[tcsc_controllable] += dx[j6a:j6b]
+            x_control_tcsc = np.clip(x_control_tcsc, tcsc_min_x, tcsc_max_x)
         if tdpf:
             T = T + dx[j7:][tdpf_lines]
 
@@ -340,6 +341,15 @@ def newtonpf(Ybus, Sbus, V0, ref, pv, pq, ppci, options, makeYbus=None):
         tcsc[tcsc_branches, TCSC_IF] = np.abs(Ibus_tcsc[tcsc_fb]) * baseI
         tcsc[tcsc_branches, TCSC_IT] = np.abs(Ibus_tcsc[tcsc_tb]) * baseI
         tcsc[tcsc_branches, TCSC_X_PU] = 1 / calc_y_svc_pu(x_control_tcsc, tcsc_x_l_pu, tcsc_x_cvar_pu)
+
+
+        # print("i", i)
+        # print("P", (V * conj(Ybus * V)*baseMVA).real.round(2))
+        # print("Q", (V * conj(Ybus * V)*baseMVA).imag.round(2))
+        # print("P TCSC", (V * conj(Ybus_tcsc * V)*baseMVA).real.round(3))
+        # print("Q TCSC", (V * conj(Ybus_tcsc * V)*baseMVA).imag.round(3))
+        # print("P tot", (V * conj((Ybus+Ybus_tcsc) * V)*baseMVA).real.round(3))
+        # print("Q tot", (V * conj((Ybus+Ybus_tcsc) * V)*baseMVA).imag.round(3))
 
     return V, converged, i, J, Vm_it, Va_it, r_theta_pu / baseMVA * T_base, T * T_base
 
